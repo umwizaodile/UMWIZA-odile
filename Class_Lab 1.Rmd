@@ -1,0 +1,301 @@
+---
+title: "Big_data_Science"
+author: "UWMIZA Odile"
+date: "2025-10-16"
+output: html_document
+---
+```{r}
+x <- c(0.5, 0.6)
+age<-c(20,35,32,29)
+summary(age)
+## Min. 1st Qu. Median Mean 3rd Qu. Max.
+## 20.00 26.75 30.50 29.00 32.75 35.00
+age<-c(35,24,18,24)
+mean(age)
+## [1] 25.25
+```
+```{r}
+x <- c(TRUE, FALSE)
+x <- c(T, F)
+```
+
+```{r}
+x <- c("a", "b", "c" )
+class<-c("M","F","F","M")
+```
+
+```{r}
+x <- 9:29
+```
+
+```{r}
+x <- c(1+0i, 2+4i)
+```
+
+
+```{r}
+x<- matrix(1:6, nrow = 2, ncol = 3)
+x
+```
+```{r}
+(y<-matrix(1:6, nrow = 3, ncol = 2))
+```
+```{r}
+x%*%y
+```
+
+```{r}
+x <- list(1, "a", TRUE, 1 + 4i)
+x
+```
+
+
+```{r}
+x <- factor(c("yes", "yes", "no", "yes", "no"))
+```
+
+
+```{r}
+x <- c(1, 2, NA, 10, 3)
+```
+
+
+```{r}
+is.na(x)
+```
+
+```{r}
+x <- c(1, 2, 4, "NA", 5)
+bad <- is.na(x)
+print(bad)
+```
+```{r}
+x[!bad]
+```
+
+```{r}
+x <- c(1, 2, NA, 4, NA, 5)
+y <- c("a", "b", NA, "d", NA, "f")
+good <- complete.cases(x, y)
+good
+```
+```{r}
+sum(c(TRUE,TRUE,FALSE,FALSE,FALSE))
+```
+```{r}
+studentID<-c(1,2,3,4,5)
+math_score<-c(12,17,10,9,NA)
+gender<-c("M","F","M","M","F")
+it_score<-c(13,18,11,10,19)
+scoredata<-data.frame(studentID,gender,math_score,it_score)
+scoredata
+```
+```{r}
+data_class2<-data.frame(height=numeric(0),weight=numeric(0),bmi=numeric
+(0))
+data_class2<-edit(data_class2)
+```
+
+```{r}
+?data("women")
+```
+
+```{r}
+head(women)
+```
+
+```{r}
+tail(women)
+```
+```{r}
+summary(women)
+```
+```{r}
+length(women$WEIGHT)
+```
+```{r}
+data() # list of datasets currently available
+data("airquality")
+variable.names(airquality)
+```
+
+
+```{r}
+str(airquality)
+```
+
+```{r}
+str(women)
+```
+
+
+```{r}
+apply(women,2,mean)
+```
+
+```{r}
+apply(women,2,sd)
+```
+
+```{r}
+c(mean(women$HEIGHT)
+```  
+  
+  
+```{r}
+data("iris")
+head(iris)
+## Sepal.L
+```
+  
+```{r}
+mean(iris$Petal.Length)
+```
+  
+```{r}
+mean(iris$Petal.Length[iris$Species=="setosa"])
+```
+  
+```{r}
+mean(iris$Petal.Length[iris$Species=="versicolor"])
+```
+  
+```{r}
+mean(iris$Petal.Length[iris$Species=="virginica"])
+```
+  
+```{r}
+by(iris$Petal.Length,iris$Species,mean)
+```
+```{r}
+by(iris$Petal.Length,iris$Species,sd)
+```
+  
+```{r}
+by(iris$Petal.Length,iris$Species,summary)
+```
+```{r}
+boxplot(iris$Sepal.Length~iris$Species,data=iris, main="Comparison")
+```
+```{r}
+ucba<-data.frame(UCBAdmissions)
+head(ucba)
+```
+```{r}
+cross<-xtabs(Freq~Gender+Admit,data=ucba)
+(cross<-xtabs(Freq~Gender+Admit,data=ucba))
+```
+  
+```{r}
+prop.table(cross,2)
+```
+  
+```{r}
+cross2<-xtabs(Freq~Gender+Admit,data=ucba[ucba$Dept=="A",])
+prop.table(cross2,1)
+```
+  
+```{r}
+dat <- read.table(text ="ProdA ProdB ProdC ProdD
+1 110 50 60 70
+2 120 50 80 65", header= TRUE)
+barplot(as.matrix(dat),beside=FALSE,col=c("Red","green"))
+```
+  
+```{r}
+dat <- read.table(text = "A B C D E F G
+1 10 80 30 90 70 60 90
+2 20 50 70 50 40 10 40
+3 60 80 80 60 60 30 160
+4 20 40 70 80 20 10 70", header = TRUE)
+barplot(as.matrix(dat))
+
+```
+  
+```{r}
+plot(women[,1],women[,2])
+
+```
+  
+```{r}
+data_class <- women   # use the built-in dataset
+
+data_lm <- lm(weight ~ height, data = data_class)
+summary(data_lm)
+
+```
+```{r}
+data_class <- women
+hist(data_class$height,
+     main = "Histogram of Height (Women Dataset)",
+     xlab = "Height (inches)",
+     col = "skyblue",
+     border = "white")
+
+```
+```{r}
+data_class <- women
+
+plot(weight ~ height, data = data_class,
+     main = "Weight vs Height (Women Dataset)",
+     xlab = "Height (inches)",
+     ylab = "Weight (lbs)",
+     pch = 19, col = "darkgreen")
+
+abline(lm(weight ~ height, data = data_class), col = "red", lwd = 2)
+
+lines(lowess(data_class$height, data_class$weight), col = "blue", lwd = 2)
+
+```
+```{r}
+data_class <- women
+
+cor(data_class$height, data_class$weight)
+
+model1 <- lm(weight ~ height, data = data_class)
+summary(model1)
+
+```
+```{r}
+data_class <- women
+attach(data_class) 
+
+weight_kg <- weight * 0.453592  
+height_m  <- height / 100      
+
+BMI <- weight_kg / (height_m^2)
+BMI
+
+```
+```{r}
+data_class <- women
+
+weight_kg <- data_class$weight * 0.453592
+height_m  <- data_class$height / 100
+
+BMI <- round(weight_kg / (height_m^2), 2)
+BMI
+
+data_class$BMI <- BMI
+head(data_class)
+
+```
+  
+```{r}
+head(cbind(data_class,BMI),n=5)
+```
+  
+```{r}
+new_data_class<-cbind(data_class,BMI)
+tail(cbind(data_class,BMI),n=10)
+```
+```{r}
+summary(BMI)
+#
+```
+  
+```{r}
+stem(BMI,scale=2)
+```
+  
+  
