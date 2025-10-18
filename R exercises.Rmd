@@ -1,0 +1,247 @@
+---
+title: "EXercise that covers all R TOPICS"
+author: "UMWIZA"
+date: "2025-10-18"
+output:
+  pdf_document: default
+  html_document: default
+---
+#1. DATA CLEANING
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(readr)
+
+
+students <- data.frame(
+  Name = c("Alice", "Bob", "Charles", "Diane", "Eve", "Frank"),
+  Gender = c("F", "M", "M", "F", "F", NA),
+  Score = c(85, 90, NA, 88, 95, 82),
+  Hours_Studied = c(10, 12, 9, 11, 13, 8)
+)
+#1.Check how many missing values are in each column.
+
+is.na(students)
+sum(is.na(students))
+colSums(is.na(students))
+
+```
+
+```{r}
+#2.Replace missing Score with the average score.
+students$Score[is.na(students$Score)] <- mean(students$Score, na.rm = TRUE)
+# 3. Replace missing Gender with "M"
+students$Gender[is.na(students$Gender)] <- "M"
+print(students)
+```
+
+```{r}
+# 4. Select only Name, Score, Hours_Studied
+students_selected <- students[, c("Name", "Score", "Hours_Studied")]
+print(students_selected)
+```
+
+```{r}
+# 5. Rename Hours_Studied to Study_Hours
+names(students_selected)[3] <- "Study_Hours"
+students_selected
+```
+```{r}
+#2.SUMMARIZING DATA
+
+data <- data.frame(
+  Country = c("Rwanda", "Rwanda", "Kenya", "Kenya", "Uganda", "Uganda"),
+  Year = c(2020, 2021, 2020, 2021, 2020, 2021),
+  GDP = c(11.2, 12.5, 15.3, 16.1, 10.8, 11.7)
+)
+
+# 1. Overall average GDP
+mean(data$GDP)
+
+# 2. Average GDP per country
+data %>% group_by(Country) %>% summarise(Average_GDP = mean(GDP))
+# 3. Minimum GDP per country
+data %>% group_by(Country) %>% summarise(Min_GDP = min(GDP))
+
+# 4. Count years per country
+data %>% group_by(Country) %>% summarise(Years = n())
+
+# 5. Add new column GDP_in_billions
+data <- data %>% mutate(GDP_in_billions = GDP)
+
+
+```
+
+#3.visualization
+
+```{r}
+#Bar chart of scores
+ggplot(students, aes(x = Name, y = Score, fill = Gender)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Scores per Student")
+
+
+```
+
+```{r}
+#2. Histogram of study hours
+ggplot(students, aes(x = Hours_Studied)) +
+  geom_histogram(bins = 5, fill = "blue", color = "white")
+
+```
+```{r}
+#3. Scatter plot (Score vs Hours)
+
+ggplot(students, aes(x = Hours_Studied, y = Score)) +
+  geom_point(size = 3, color = "darkgreen")
+
+```
+```{r}
+#4. Scatter + regression line
+
+ggplot(students, aes(x = Hours_Studied, y = Score)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE, color = "red")
+
+```
+```{r}
+#5. Color by Gender
+
+ggplot(students, aes(x = Hours_Studied, y = Score, color = Gender)) +
+  geom_point(size = 3) +
+  geom_smooth(method = "lm", se = FALSE)
+
+```
+#Simple Linear Regression
+
+```{r}
+students <- data.frame(
+  Hours_Studied = c(5, 6, 8, 10, 12, 15),
+  Score = c(55, 60, 65, 72, 78, 90)
+)
+
+# 1. Build model
+model <- lm(Score ~ Hours_Studied, data = students)
+summary(model)
+
+# 2. Regression equation
+# Equation: Score = Intercept + (Slope * Hours_Studied)
+
+# 3. Predict for 9 hours
+new <- data.frame(Hours_Studied = 9)
+predict(model, new)
+
+# 4. Check R-squared and p-value from summary output
+# R² close to 1 = strong fit
+# p-value < 0.05 = significant relationship
+
+# 5. Plot regression line
+ggplot(students, aes(x = Hours_Studied, y = Score)) +
+  geom_point() +
+  geom_smooth(method = "lm", se=FALSE ,color = "blue")
+
+```
+#5️⃣ Multiple Linear Regression
+
+```{r}
+students <- data.frame(
+  Hours_Studied = c(10, 12, 9, 11, 13, 8),
+  Attendance = c(90, 95, 85, 88, 92, 80),
+  Score = c(85, 90, 78, 88, 95, 82)
+)
+
+# 1. Build model
+multi_model <- lm(Score ~ Hours_Studied + Attendance, data = students)
+summary(multi_model)
+
+# 2. Interpret coefficients:
+# Each 1 hour ↑ study = + (slope1)
+# Each 1% ↑ attendance = + (slope2)
+
+# 3. Check R-squared and p-values in summary()
+
+# 4. Predict new score
+new_student <- data.frame(Hours_Studied = 12, Attendance = 90)
+predict(multi_model, new_student)
+
+```
+#6️⃣ Logistic Regression
+
+```{r}
+students <- data.frame(
+  Hours_Studied = c(2, 4, 6, 8, 10, 12),
+  Pass = c(0, 0, 0, 1, 1, 1)
+)
+
+# 1. Build logistic model
+log_model <- glm(Pass ~ Hours_Studied, data = students, family = binomial)
+summary(log_model)
+
+# 2. Predict probability
+newdata <- data.frame(Hours_Studied = c(5, 7, 11))
+predict(log_model, newdata, type = "response")
+
+# 3. Plot logistic curve
+ggplot(students, aes(x = Hours_Studied, y = Pass)) +
+  geom_point() +
+  stat_smooth(method = "glm", method.args = list(family = "binomial"), color = "red")
+
+
+```
+Interpretation Tip:
+
+p-value < 0.05 means the variable is significant.
+
+Predicted probability closer to 1 = more likely to pass.
+
+#7️⃣ Correlation
+
+```{r}
+students <- data.frame(
+  Hours_Studied = c(2, 4, 6, 8, 10, 12),
+  Score = c(50, 55, 60, 70, 75, 85)
+)
+# 1. Correlation coefficient
+cor(students$Hours_Studied, students$Score)
+
+# 2. Visualize
+ggplot(students, aes(x = Hours_Studied, y = Score)) +
+  geom_point() +
+  geom_smooth(method = "lm", color = "blue")
+
+
+```
+
+Final Tips
+
+Concept	What to Look For	Good Value / Sign
+R²	How well model explains variation	Closer to 1 = better
+p-value	Significance of variable	< 0.05 = significant
+Residuals	Difference between real & predicted	Smaller = better
+Correlation	Strength of relationship	> 0.7 (strong), < 0.3 (weak)
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
