@@ -1,0 +1,661 @@
+
+title: "MID_TERM PROJECT"
+author: "UMWIZA Odile
+MY ID:101365"
+date: "2025-10-12"
+output: html_document
+
+# POPULATION GROWTH AND C02 EMMISSIONS
+
+#4 Task description
+##4.1 Downloading data and load them to R studio
+```{r}
+library(readr)       #it's for reading CSV files
+library(dplyr)      # it's for data manipulation
+library(ggplot2)    # for visualization
+library(tidyr)       # for data cleaning 
+ population_data <- read.csv("C:\\Users\\bienvenu\\Desktop\\R FOR DATA SCIENCE\\world_population.csv", header = TRUE, sep = ",")
+ head(population_data)
+```
+```{r}
+# LOADING C02_emmission DATASET
+co2_emission <- read.csv("C:\\Users\\bienvenu\\Desktop\\R FOR DATA SCIENCE\\CO2_emission.csv", header = TRUE, sep = ",")
+head(co2_emission)
+```
+# 4.2 Exploratory data analysis
+## 1.Display variable name
+```{r}
+names(population_data)
+```
+# 2.Display top5 rows
+```{r}
+head(population_data,5)
+```
+#3.Display bottom 10 rows
+```{r}
+tail(population_data,10)
+```
+#4.Data types
+```{r}
+str(population_data)
+```
+#5.shape of dataset(rows&columns)
+```{r}
+dim(population_data)
+```
+#6.Drop duplicate rows
+```{r}
+sum(duplicated(population_data))
+```
+#7.Find missing values in each column
+```{r}
+colSums(is.na(population_data))
+```
+#8.Boxplots to check outliers in each column
+# For numeric valiables
+```{r}
+# Select only numeric columns
+numeric_cols <- population_data[, sapply(population_data, is.numeric)]
+
+# Create boxplots for all numeric variables
+boxplot(numeric_cols,
+        main = "Boxplots of All Numeric Variables",
+        las = 2,        # Rotate x-axis labels
+        col = "lightblue")
+```
+
+the above boxplot will help me to understand the distribution of variables and identify outliers this shows that population variables 
+VARIABLES with outliers are those circles above Rank few outliers at top
+
+```{r}
+#4.3 Generating new Variable by using World Population Dataset
+##POPULATION PREDICTION FOR 2030
+
+# Time period
+t <- 8
+
+# If growth rate is in percent, convert to decimal
+population_data$Growth.Rate <- population_data$Growth.Rate / 100
+
+# Apply the population projection formula
+population_data$Predicted_2030 <- population_data$X2022.Population * exp(population_data$Growth.Rate * t)
+head(population_data[, c("Country.Territory", "X2022.Population", "Growth.Rate", "Predicted_2030")])
+```
+#2.calculating growth rate value
+```{r}
+```
+population_data$Population_2030 ← Creates a NEW column called "Population_2030"
+<- ← Means "put the answer here
+population_data$X2022.Population ← Takes the 2022 population (P)
+* ← Multiply
+exp(...) ← This is the "e" part of the formula
+population_data$Growth.Rate * t ← Growth rate times time period (r×t)
+
+#view the result
+```{r}
+head(population_data[, c("Country.Territory", "X2022.Population", "Growth.Rate", "Predicted_2030")], 10)
+colnames(population_data)
+```
+#5.checking if my new column created
+```{r}
+cat("\nNew column 'Population_2030' created successfully!\n")
+cat("Total columns now:", ncol(population_data), "\n")
+
+```
+# 4.4 Value extraction and plot
+```{r}
+# Turn off scientific notation for readability
+options(scipen = 999)
+# Extract top 10 countries by 2022 population
+top_10_countries <- population_data[order(population_data$X2022.Population, decreasing = TRUE), ]
+top_10_countries <- top_10_countries[1:10, ]
+# View the top 10
+print(top_10_countries[, c("Country.Territory", "X2022.Population")])
+
+
+
+```
+#4.1create bar chart
+```{r}
+# Create bar chart
+ggplot(top_10_countries, aes(x = reorder(Country.Territory, -X2022.Population), 
+                               y = X2022.Population)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(title = "Top 10 Most Populous Countries (2022)",
+       x = "Country",
+       y = "Population (2022)") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+i used barchart because  helps to rank easily and comparison
+
+#4.4.2.Show the trend in their population number since 1990-2022 by using appro-
+#priate graph.
+# i will need to use line chart we want to show trends over time
+```{r}
+# Select only population columns for top 10 countries
+population_years <- top_10_countries[, c("Country.Territory", 
+                                          "X1990.Population", 
+                                          "X2000.Population",
+                                          "X2010.Population", 
+                                          "X2015.Population",
+                                          "X2020.Population", 
+                                          "X2022.Population")]
+# Reshape from wide to long format
+population_long <- pivot_longer(population_years,
+                                cols = starts_with("X"),
+                                names_to = "Year",
+                                values_to = "Population")
+
+# Clean year names (remove "X" and ".Population")
+population_long$Year <- gsub("X", "", population_long$Year)
+population_long$Year <- gsub(".Population", "", population_long$Year)
+population_long$Year <- as.numeric(population_long$Year)
+
+# View the result
+head(population_long)
+
+# Create line chart showing population trend
+ggplot(population_long, aes(x = Year, y = Population, color = Country.Territory, group = Country.Territory)) +
+  geom_line(size = 1) +
+  geom_point() +
+  labs(title = "Population Trend of Top 10 Countries (1990-2022)",
+       x = "Year",
+       y = "Population",
+       color = "Country") +
+  theme_minimal() +
+  theme(legend.position = "right")
+```
+aes() = x is Year, y is Population, different colors for each country
+geom_line() = draws the lines
+geom_point() = adds dots at each data point
+color = Country.Territory = different color for each country
+
+#4.4.3 Use CO2 Emissions Around the World dataset to extract emission of 10 most
+#populous countries. Use an appropriate graph to show their emission trend
+#since 1990-2019.
+### LET'S START BY WORKING WITH C02 DATASET
+#### I WILL START LOOKING HOW CO2_EMISSION LOOKS LIKE
+```{r}
+head(co2_emission)
+```
+#datatype
+```{r}
+str(co2_emission)
+```
+```{r}
+names(co2_emission)
+```
+```{r}
+# first we want to 
+# Get list of top 10 country names
+country_list <- top_10_countries$Country.Territory  # we have 10 countries we created and we want to extract country names that subset of population data from top 10 countries which has  10 rows
+#and we have to do is to get their c02 emission
+
+```
+# we are continue on Extract names from top_10_countries (which came from population data)
+#    Use those names to find matching countries in CO2 data
+# i will need to use it to find those same countries in the CO2 dataset
+```{r}
+# View the list
+print(country_list)
+```
+```{r}
+# Filter CO2 data to keep only the top 10 countries
+co2_selected <- co2_emission[co2_emission$Country.Name %in% country_list, ]
+
+# Check how many countries matched
+cat("Number of countries matched:", nrow(co2_selected), "\n")
+
+# View which countries were found
+print(co2_selected$Country.Name)
+```
+#this means one country is missing i have to find which country is missing actually it must match
+
+```{r}
+# Show the 10 countries from population data
+cat("Top 10 from Population Data:\n")
+print(country_list)
+```
+```{r}
+# let's check those 9 that matched in CO2 data
+cat("\nMatched in CO2 Data:\n")
+print(co2_selected$Country.Name)
+```
+```{r}
+# let's find which one is missing
+missing_country <- setdiff(country_list, co2_selected$Country.Name)
+cat("\nMissing country:\n")
+print(missing_country)
+```
+```{r}
+# Search for Russia in CO2 data
+grep("Russia", co2_emission$Country.Name, value = TRUE, ignore.case = TRUE)
+```
+```{r}
+# Create a fixed version of country list
+country_list_fixed <- country_list
+
+# Replace "Russia" with "Russian Federation"
+country_list_fixed[country_list_fixed == "Russia"] <- "Russian Federation"
+
+# Now filter CO2 data with the corrected names
+co2_selected <- co2_emission[co2_emission$Country.Name %in% country_list_fixed, ]
+
+# Check how many matched now
+cat("Countries matched:", nrow(co2_selected), "\n")
+
+# View all matched countries
+print(co2_selected$Country.Name)
+```
+# now we want to keep columns we need country name and years only(1990_2019)
+```{r}
+# Select country and year columns from 1990 to 2019
+co2_subset <- co2_selected[, c("Country.Name", 
+                                paste0("X", 1990:2019))]
+
+# Check the structure
+cat("Dimensions:", nrow(co2_subset), "rows,", ncol(co2_subset), "columns\n")
+
+# View first few rows and columns
+head(co2_subset[, 1:6])
+```
+# and now we are going to convert each year column into rows
+
+```{r}
+# Reshape from wide to long format
+co2_long <- pivot_longer(co2_subset,
+                         cols = starts_with("X"),
+                         names_to = "Year",
+                         values_to = "CO2_Emission")
+
+# View the result
+head(co2_long, 15)
+
+# Check dimensions
+cat("Long format has", nrow(co2_long), "rows and", ncol(co2_long), "columns\n")
+```
+# and now we are going to remove these X from years and coverting to numbers
+
+```{r}
+# Remove "X" from year values
+co2_long$Year <- gsub("X", "", co2_long$Year)
+
+# Convert to numeric
+co2_long$Year <- as.numeric(co2_long$Year)
+
+# Check the cleaned years
+cat("Sample years:\n")
+print(head(co2_long$Year, 10))
+
+# View the cleaned data
+head(co2_long, 10)
+```
+# we are going to Visualize  CO2 trends over time for all 10 countries
+
+```{r}
+# Create line chart
+ggplot(co2_long, aes(x = Year, 
+                      y = CO2_Emission, 
+                      color = Country.Name, 
+                      group = Country.Name)) +
+  geom_line(size = 1) +
+  geom_point(size = 1.5) +
+  labs(title = "CO2 Emissions Trend of Top 10 Populous Countries (1990-2019)",
+       x = "Year",
+       y = "CO2 Emissions (metric tons per capita)",
+       color = "Country") +
+  theme_minimal() +
+  theme(legend.position = "right")
+```
+# i used line chart because iam checking the change time over 30 years and line chart shows it clearly
+#Line going UP = CO2 emissions increasing
+#Line going DOWN = CO2 emissions decreasing
+#Line FLAT = emissions staying stable
+
+#Time flows continuously: 1990 → 1991 → 1992 →....
+#The line shows this continuous progression
+#Makes it easy to see if a country's emissions rose or fell
+
+#Different colored lines for each country
+#Can see which country increased fastest
+#Can compare patterns between countries
+
+THIS IS HOW LOGIGICALLY I DID IT 
+
+population_data (all countries)
+    ↓
+Sort by 2022 population, take top 10
+    ↓
+top_10_countries (10 countries from population data)
+    ↓
+Extract country names → country_list
+    ↓
+Use those names to filter co2_emission dataset
+    ↓
+Get CO2 data for the same 10 countries
+
+Correlation measures the relationship between two variables:
+
+Positive correlation (+1): When one goes UP, the other goes UP
+Negative correlation (-1): When one goes UP, the other goes DOWN
+No correlation (0): No relationship
+
+Area..km..
+Density..per.km..
+Growth.Rate
+World.Population.Percentage
+
+# 4.5 CORRELATION ANLYSIS
+```{r}
+#  Step 1: Select the variables
+# Select relevant numeric columns
+cor_data <- population_data[, c("Area..km..", "Density..per.km..", "Growth.Rate", "World.Population.Percentage")]
+#Make sure everything is numeric:
+str(cor_data)
+#If any column is character, convert it to numeric:
+
+#Step 3: Find correlation numerically
+correlation_matrix <- cor(cor_data, use = "complete.obs")
+correlation_matrix
+
+```
+This shows the numerical correlation values (from -1 to +1).
+
+*+1 = strong positive relationship
+
+*-1 = strong negative relationship
+
+*0 = no relationship
+
+```{r}
+
+```
+
+
+
+#4.5.2. MERGE THE WORLD POPULATION DATASET AND CO2 EMISSIONS
+```{r}
+# Check population dataset
+cat("Population dataset rows:", nrow(population_data), "\n")
+head(population_data$Country.Territory, 20)
+```
+```{r}
+# Check CO2 dataset
+cat("\nCO2 dataset rows:", nrow(co2_emission), "\n")
+head(co2_emission$Country.Name, 20)
+```
+# now after checking our datasets iam going to merge on country names
+```{r}
+# Merge on country name
+merged_data <- merge(population_data, co2_emission, 
+                     by.x = "Country.Territory", 
+                     by.y = "Country.Name", 
+                     all = FALSE)
+# Check if it worked
+cat("Merged dataset has", nrow(merged_data), "countries\n")
+```
+```{r}
+# the first one is to Merge the two datasets
+merged_data <- merge(population_data, co2_emission, 
+                     by.x = "Country.Territory", 
+                     by.y = "Country.Name")
+nrow(merged_data)
+# See all column names
+names(merged_data)
+
+
+# creating a new dataset with only 3 columns we need
+analysisdata <- merged_data %>%
+  select(Country.Territory, X2022.Population, X2019)
+ #Check if analysisdata exists now
+nrow(analysisdata)
+
+
+# i want to give my columns easier names Give columns 
+names(analysisdata) <- c("Country", "Population", "CO2")
+
+# Check the new names
+head(analysisdata, 10)
+```
+# as you can see i have NA missing values in my new dataset before i procceed i have to clean my dataset 
+## iam going to remose those NA
+```{r}
+sum(is.na(merged_data))
+# Remove rows with missing (NA) values
+analysisdata <- analysisdata[!is.na(analysisdata$CO2), ]
+# Check how many countries remain
+nrow(analysisdata)
+
+# Look at first 15 rows
+head(analysisdata, 15)
+
+# Get summary statistics
+summary(analysisdata)
+```
+
+#  Statistical Analysis (Numerical Values)
+```{r}
+cat("\n**Descriptive Statistics:**\n")
+cat("Population - Mean:", mean(analysisdata$Population), "\n")
+cat("Population - Median:", median(analysisdata$Population), "\n")
+cat("Population - SD:", sd(analysisdata$Population), "\n")
+cat("Population - Min:", min(analysisdata$Population), "\n")
+cat("Population - Max:", max(analysisdata$Population), "\n")
+
+cat("\nCO2 - Mean:", mean(analysisdata$CO2), "\n")
+cat("CO2 - Median:", median(analysisdata$CO2), "\n")
+cat("CO2 - SD:", sd(analysisdata$CO2), "\n")
+cat("CO2 - Min:", min(analysisdata$CO2), "\n")
+cat("CO2 - Max:", max(analysisdata$CO2), "\n")
+```
+```{r}
+# let's continue by Calculating Correlation Coefficient for more analysis
+cat("\n=== CORRELATION ANALYSIS ===\n")
+
+# Calculate Pearson correlation coefficient
+correlation <- cor(analysisdata$Population, analysisdata$CO2, method = "pearson")
+cat("Correlation coefficient:", round(correlation, 4), "\n\n")
+
+
+```
+# corralation test
+```{r}
+cat("**Correlation Test Results:**\n")
+cor_test <- cor.test(analysisdata$Population, analysisdata$CO2, method = "pearson")
+
+cat("P-value:", format(cor_test$p.value, scientific = TRUE), "\n")
+cat("95% Confidence Interval: [", 
+    round(cor_test$conf.int[1], 4), ", ", 
+    round(cor_test$conf.int[2], 4), "]\n")
+```
+# we are going to interprete our result
+
+```{r}
+cat("\n**Interpretation:**\n")
+
+# Interpret strength
+if(abs(correlation) < 0.3) {
+  cat("- Correlation strength: WEAK (|r| < 0.3)\n")
+} else if(abs(correlation) < 0.7) {
+  cat("- Correlation strength: MODERATE (0.3 ≤ |r| < 0.7)\n")
+} else {
+  cat("- Correlation strength: STRONG (|r| ≥ 0.7)\n")
+}
+
+```
+```{r}
+# Interpret direction
+if(correlation > 0) {
+  cat("- Direction: POSITIVE (as population increases, CO2 increases)\n")
+} else {
+  cat("- Direction: NEGATIVE (as population increases, CO2 decreases)\n")
+}
+```
+```{r}
+# Interpret significance
+if(cor_test$p.value < 0.05) {
+  cat("- Statistical significance: SIGNIFICANT (p < 0.05)\n")
+  cat("  → The relationship is statistically significant.\n")
+} else {
+  cat("- Statistical significance: NOT SIGNIFICANT (p ≥ 0.05)\n")
+  cat("  → Cannot conclude there is a real relationship.\n")
+}
+```
+
+```{r}
+# Create scatter plot to visualize the relationship
+ggplot(analysisdata, aes(x = Population, y = CO2)) +
+  geom_point(color = "blue", size = 3, alpha = 0.6) +
+  geom_smooth(method = "lm", color = "red", se = TRUE) +
+  scale_x_continuous(labels = scales::comma) +
+  labs(title = "Relationship between Population (2022) and CO2 Emissions (2019)",
+       x = "Population in 2022",
+       y = "CO2 Emissions in 2019 (metric tons per capita)") +
+  theme_minimal()
+```
+Each blue dot = one country
+Red line = the trend/pattern of relationship
+If line goes up = positive relationship (more population = more CO2)
+If line is flat = no relationship
+
+```{r}
+names(analysisdata)
+# STEP 1: Build the regression model
+cat("\nSTEP 1: Building regression model...\n")
+model <- lm(CO2 ~ Population, data = analysisdata)
+cat("✓ Model created!\n")
+
+# STEP 2: View the model summary
+cat("\nSTEP 2: Model summary:\n")
+summary(model)
+
+# STEP 3: Get the coefficients
+cat("\nSTEP 3: Extract coefficients:\n")
+intercept <- coef(model)[1]
+slope <- coef(model)[2]
+cat("Intercept:", intercept, "\n")
+cat("Slope:", slope, "\n")
+
+ #STEP 4: Get R-squared
+cat("\nSTEP 4: R-squared value:\n")
+r_squared <- summary(model)$r.squared
+cat("R-squared:", r_squared, "\n")
+cat("This means", round(r_squared * 100, 2), "% of CO2 variation is explained by Population\n")
+
+# STEP 5: Check if model is significant
+cat("\nSTEP 5: Check significance:\n")
+model_summary <- summary(model)
+p_value <- pf(model_summary$fstatistic[1], 
+              model_summary$fstatistic[2], 
+              model_summary$fstatistic[3], 
+              lower.tail = FALSE)
+cat("P-value:", p_value, "\n")
+
+if(p_value < 0.05) {
+  cat("Result: SIGNIFICANT (p < 0.05)\n")
+} else {
+  cat("Result: NOT SIGNIFICANT (p >= 0.05)\n")
+}
+
+# STEP 6: Make predictions
+cat("\nSTEP 6: Example predictions:\n")
+new_population <- c(10000000, 50000000, 100000000)
+predicted_co2 <- predict(model, newdata = data.frame(Population = new_population))
+
+for(i in 1:length(new_population)) {
+  cat("If Population =", new_population[i], 
+      "→ Predicted CO2 =", round(predicted_co2[i], 2), "\n")
+}
+
+# Create the plot
+plot(analysisdata$Population, analysisdata$CO2,
+     main = "Population vs CO2 Emissions",
+     xlab = "Population",
+     ylab = "CO2 Emissions",
+     pch = 19,
+     col = "blue")
+
+# Add the regression line
+abline(model, col = "red", lwd = 2)
+
+# Add legend
+legend_text <- paste("R-squared =", round(r_squared, 3))
+legend("topleft", legend = legend_text, bty = "n")
+
+cat("✓ Plot created!\n")
+
+#4.6 Comparing CO2 Emissions in continents
+library(dplyr)
+library(ggplot2)
+library(readr)
+
+# Read the dataset
+data <- merged_data
+  
+# Clean and rename relevant columns
+data <- data %>%
+  rename(
+    Country = Country.Territory,
+    Continent = Continent,
+    Population_2022 = X2022.Population,
+    CO2_2019 = X2019
+  )
+
+# Remove missing values if any
+ data <- na.omit(data)
+
+
+# Use a graphical method to compare the CO2 emission of the continents with their sum.
+
+continent_summary <- data %>%
+  group_by(Continent) %>%
+  summarise(Total_CO2_2019 = sum(CO2_2019, na.rm = TRUE))
+
+# Comparizon of co2 emission of the continent By using a graph
+ggplot(continent_summary, aes(x = reorder(Continent, -Total_CO2_2019),
+                              y = Total_CO2_2019,
+                              fill = Continent)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = round(Total_CO2_2019, 2)),   # show total CO₂
+            vjust = -0.5, size = 4) +
+  labs(
+    title = "Total CO2 Emissions by Continent (2019)",
+    x = "Continent",
+    y = "Total CO2 Emissions (Metric Tons per Capita)",
+    fill = "Continent"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 14, face = "bold", hjust = 0.5)
+  )
+
+geom_text(aes(label = scales::comma(round(Total_CO2_2019, 1))),
+          vjust = -0.5, size = 4)
+```
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+continent_summary <- data %>%
+  group_by(Continent) %>%
+  summarise(Total_CO2_2019 = sum(CO2_2019, na.rm = TRUE))
+
+
+```
+
+```{r}
+continent_summary <- continent_summary %>%
+  arrange(desc(Total_CO2_2019))
+
+continent_summary
+
+```
+```{r}
+continent_summary
+
+```
+
